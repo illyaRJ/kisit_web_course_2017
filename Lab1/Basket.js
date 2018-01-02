@@ -1,75 +1,78 @@
-var prodcuts = [{
-	name : "test",
-	price : 12.9,
-	inventory : 20
-}, {
-	name : "test2",
-	price : 30,
-	inventory : 80
-}];
+var prodcuts = [{ 
+	name : "test", 
+	price : 12.9, 
+	inventory : 20 
+}, { 
+	name : "test2", 
+	price : 30, 
+	inventory : 80 
+}]; 
 
-class ProductLineItem {
- 	
-	constructor(product) {
-		this.amount = 1;
-		this.product = product;
-	}
-	
-	  getAmount () {
-		return this.amount;
-	}
-	 setAmount(quantity) {
-		this.amount = quantity;
-	}
-	 getProduct() {
-		return this.product;
-	}
-	
-	
-}
+class ProductLineItem { 
+
+	constructor(productID) { 
+		this.id = productID; 
+		this.quantity = 1; 
+		this.product = prodcuts[productID]; 
+	} 
+
+	setQuantity(quantity) { 
+		this.quantity = quantity; 
+	}  
+} 
 
 
-var basket = (function(){
-	var a = []
-	return {
-		addProduct : function(productID){
-			if(a[productID] == null) {
-				if ( prodcuts[productID].inventory-1 >= 0) {
-					a[productID] = new ProductLineItem(prodcuts[productID]);
-					a[productID].getProduct().inventory--;
-				} else {
-					alert("Продукт відсутній на складі");
-				}
-			} else {
-				alert("Продукт вже обраний");
-			}
-				
-		},
-		removeProduct : function(productID){
-			prodcuts[productID].inventory = prodcuts[productID].inventory + a[productID].getAmount();
-			delete a[productID];
-		},
-		updateProductQuantity : function(productID, quantity) {
-			if ( a[productID].getProduct().inventory-quantity+ a[productID].getAmount() >= 0) {
-				a[productID].getProduct().inventory = a[productID].getProduct().inventory - quantity + a[productID].getAmount();
-				a[productID].setAmount(quantity);
-			} else {
-				alert("Продукт відсутній на складі");
-			}
-		},
-		getTotalPrice : function(){
-			var totalPrice = 0;
-			if ( a[0] == null && a[1] == null) {
-				alert("Корзина порожня");
-			} else {
-				if ( a[0] != null){
-				totalPrice = totalPrice + a[0].amount*a[0].product.price;
+var basket = (function(){ 
+	var productsInBasket = [] 
+	var getIndexProduct = function (productID) { 
+		var index = null; 
+		productsInBasket.forEach(function(item, i, array) { 
+			if (item.id == productID) { 
+			index = i; 
 			} 
-			if ( a[1] != null) {
-				totalPrice = totalPrice + a[1].amount*a[1].product.price;
-			}
-			alert(totalPrice);
-			}
-		}
-	}
+		}); 
+		return index; 
+	} 
+	return { 
+		addProduct : function(productID){ 
+			var indexProduct = getIndexProduct(productID); 
+			if(indexProduct == null) { 
+				if (prodcuts[productID].inventory >= 1) { 
+					productsInBasket.push(new ProductLineItem(productID)); 
+					prodcuts[productID].inventory--; 
+				} else { 
+				alert("Немає продуктів на складі!"); 
+			} 
+			} else { 
+				alert("Ви вже вибрали цей продукт"); 
+			} 
+
+		}, 
+		removeProduct : function(productID){ 
+			var indexProduct = getIndexProduct(productID); 
+			if(indexProduct == null) { 
+				alert("Ви ще не вибрали цей продукт!"); 
+			} else { 
+				var productInBasket = productsInBasket[indexProduct]; 
+				productInBasket.product.inventory += + productInBasket.quantity; 
+				delete productsInBasket[indexProduct]; 
+			} 
+		}, 
+		updateProductQuantity : function(productID, quantity) { 
+			var productInBasket = productsInBasket[getIndexProduct(productID)]; 
+			if ( productInBasket.product.inventory - quantity + productInBasket.quantity >= 0) { 
+				productInBasket.product.inventory += productInBasket.quantity - quantity; 
+				productInBasket.setQuantity(quantity); 
+			} else { 
+				alert("Немає продуктів на складі!"); 
+			} 
+		}, 
+		getTotalPrice : function(){ 
+			var totalPrice = 0; 
+			productsInBasket.forEach(function(item, i, arr) { 
+				totalPrice += item.quantity * item.product.price; 
+			}); 
+		alert(totalPrice); 
+		} 
+	} 
 })();
